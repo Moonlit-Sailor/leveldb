@@ -83,8 +83,8 @@ FilterBlockReader::FilterBlockReader(const FilterPolicy* policy,
   uint32_t last_word = DecodeFixed32(contents.data() + n - 5);
   if (last_word > n - 5) return;
   data_ = contents.data();
-  offset_ = data_ + last_word;
-  num_ = (n - 5 - last_word) / 4;
+  offset_ = data_ + last_word; // filter entry offset array
+  num_ = (n - 5 - last_word) / 4; // filter entry num
 }
 
 bool FilterBlockReader::KeyMayMatch(uint64_t block_offset, const Slice& key) {

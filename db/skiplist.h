@@ -299,6 +299,7 @@ SkipList<Key, Comparator>::FindLessThan(const Key& key) const {
   }
 }
 
+// return the last node of SkipList
 template <typename Key, class Comparator>
 typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::FindLast()
     const {

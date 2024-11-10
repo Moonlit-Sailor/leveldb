@@ -119,6 +119,7 @@ class DBIter : public Iterator {
   size_t bytes_until_read_sampling_;
 };
 
+// Parse the key into `ikey` which current iter_ points to
 inline bool DBIter::ParseKey(ParsedInternalKey* ikey) {
   Slice k = iter_->key();
 

@@ -42,6 +42,7 @@ Status Table::Open(const Options& options, RandomAccessFile* file,
     return Status::Corruption("file is too short to be an sstable");
   }
 
+  // =============================== Read Footer ================================
   char footer_space[Footer::kEncodedLength];
   Slice footer_input;
   Status s = file->Read(size - Footer::kEncodedLength, Footer::kEncodedLength,
@@ -150,6 +151,11 @@ static void ReleaseBlock(void* arg, void* h) {
 
 // Convert an index iterator value (i.e., an encoded BlockHandle)
 // into an iterator over the contents of the corresponding block.
+/**
+ * @param arg pointer to Table
+ * @param index_value index block's entry(i.e. encoded BlockHandle of data block)
+ * @return data block's iterator
+ */
 Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
                              const Slice& index_value) {
   Table* table = reinterpret_cast<Table*>(arg);
@@ -166,6 +172,7 @@ Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
   if (s.ok()) {
     BlockContents contents;
     if (block_cache != nullptr) {
+      // Read block from cache
       char cache_key_buffer[16];
       EncodeFixed64(cache_key_buffer, table->rep_->cache_id);
       EncodeFixed64(cache_key_buffer + 8, handle.offset());
@@ -184,6 +191,7 @@ Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
         }
       }
     } else {
+      // Read block from file
       s = ReadBlock(table->rep_->file, options, handle, &contents);
       if (s.ok()) {
         block = new Block(contents);
@@ -191,6 +199,7 @@ Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
     }
   }
 
+  // Create block's iterator
   Iterator* iter;
   if (block != nullptr) {
     iter = block->NewIterator(table->rep_->options.comparator);

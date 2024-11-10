@@ -11,6 +11,7 @@
 namespace leveldb {
 
 namespace {
+// Merge sort of n children_
 class MergingIterator : public Iterator {
  public:
   MergingIterator(const Comparator* comparator, Iterator** children, int n)

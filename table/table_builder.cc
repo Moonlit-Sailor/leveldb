@@ -38,7 +38,7 @@ struct TableBuilder::Rep {
   Options options;
   Options index_block_options;
   WritableFile* file;
-  uint64_t offset;
+  uint64_t offset; // offset in current file
   Status status;
   BlockBuilder data_block;
   BlockBuilder index_block;
@@ -122,6 +122,9 @@ void TableBuilder::Add(const Slice& key, const Slice& value) {
   }
 }
 
+/**
+ * Write data block to current file and flush file
+ */
 void TableBuilder::Flush() {
   Rep* r = rep_;
   assert(!r->closed);
@@ -138,10 +141,13 @@ void TableBuilder::Flush() {
   }
 }
 
+/**
+ * Flush `block`, compress block data, and write block data to file, and set block_entry to `handle`
+ */
 void TableBuilder::WriteBlock(BlockBuilder* block, BlockHandle* handle) {
   // File format contains a sequence of blocks where each block has:
   //    block_data: uint8[n]
-  //    type: uint8
+  //    compression type: uint8
   //    crc: uint32
   assert(ok());
   Rep* r = rep_;
@@ -189,6 +195,11 @@ void TableBuilder::WriteBlock(BlockBuilder* block, BlockHandle* handle) {
   block->Reset();
 }
 
+
+/**
+ * 1. Write `block_contents` and block trailer(compression_type and crc)
+ * 2. set block_entry(offset, size) to `handle`
+ */
 void TableBuilder::WriteRawBlock(const Slice& block_contents,
                                  CompressionType type, BlockHandle* handle) {
   Rep* r = rep_;

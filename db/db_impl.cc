@@ -708,6 +708,7 @@ void DBImpl::BackgroundCompaction() {
   mutex_.AssertHeld();
 
   if (imm_ != nullptr) {
+    // Flush MemTable
     CompactMemTable();
     return;
   }
@@ -1241,6 +1242,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
         }
       }
       if (status.ok()) {
+        // Write to MemTable
         status = WriteBatchInternal::InsertInto(write_batch, mem_);
       }
       mutex_.Lock();

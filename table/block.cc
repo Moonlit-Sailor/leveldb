@@ -34,7 +34,7 @@ Block::Block(const BlockContents& contents)
       // The size is too small for NumRestarts()
       size_ = 0;
     } else {
-      restart_offset_ = size_ - (1 + NumRestarts()) * sizeof(uint32_t);
+      restart_offset_ = size_ - (1 /*restart_num*/ + NumRestarts()) * sizeof(uint32_t);
     }
   }
 }
@@ -268,6 +268,7 @@ class Block::Iter : public Iterator {
       key_.resize(shared);
       key_.append(p, non_shared);
       value_ = Slice(p + non_shared, value_length);
+      // advance restart_index_ if necessary
       while (restart_index_ + 1 < num_restarts_ &&
              GetRestartPoint(restart_index_ + 1) < current_) {
         ++restart_index_;
